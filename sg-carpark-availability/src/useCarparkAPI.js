@@ -11,12 +11,13 @@ const useCarparkAPI = () => {
       .then((data) => {
         setData(analyzeCarparks(data.items[0].carpark_data));
       });
-
-    console.log(`Fetching data at ${new Date()}`);
-    console.log(data);
   };
 
   useEffect(fetchData, []);
+  useEffect(() => {
+    console.log(`Fetching data at ${new Date()}`);
+    console.log(data);
+  }, [data]);
   useInterval(fetchData, 60000);
 
   return data;
@@ -58,148 +59,41 @@ const analyzeCarparks = (carparkData) => {
     return groups;
   }, {});
 
-  const smallCarparkHighest = Math.max(
-    ...carparkGroupedByCategory["Small"].map((carpark) => carpark.lotsAvailable)
-  );
-  const smallCarparkLowest = Math.min(
-    ...carparkGroupedByCategory["Small"].map((carpark) => carpark.lotsAvailable)
-  );
-  const listOfSmallCarparkWithHighestAvailability = carparkGroupedByCategory[
-    "Small"
-  ].filter((carpark) => carpark.lotsAvailable === smallCarparkHighest);
-  const listOfSmallCarparkWithLowestAvailability = carparkGroupedByCategory[
-    "Small"
-  ].filter((carpark) => carpark.lotsAvailable === smallCarparkLowest);
+  const result = [];
+  Object.keys(carparkGroupedByCategory).forEach((category) => {
+    const carparkHighest = Math.max(
+      ...carparkGroupedByCategory[category].map(
+        (carpark) => carpark.lotsAvailable
+      )
+    );
+    const carparkLowest = Math.min(
+      ...carparkGroupedByCategory[category].map(
+        (carpark) => carpark.lotsAvailable
+      )
+    );
+    const listOfCarparkWithHighestAvailability = carparkGroupedByCategory[
+      category
+    ].filter((carpark) => carpark.lotsAvailable === carparkHighest);
+    const listOfCarparkWithLowestAvailability = carparkGroupedByCategory[
+      category
+    ].filter((carpark) => carpark.lotsAvailable === carparkLowest);
 
-  const mediumCarparkHighest = Math.max(
-    ...carparkGroupedByCategory["Medium"].map(
-      (carpark) => carpark.lotsAvailable
-    )
-  );
-  const mediumCarparkLowest = Math.min(
-    ...carparkGroupedByCategory["Medium"].map(
-      (carpark) => carpark.lotsAvailable
-    )
-  );
-  const listOfMediumCarparkWithHighestAvailability = carparkGroupedByCategory[
-    "Medium"
-  ].filter((carpark) => carpark.lotsAvailable === mediumCarparkHighest);
-  const listOfMediumCarparkWithLowestAvailability = carparkGroupedByCategory[
-    "Medium"
-  ].filter((carpark) => carpark.lotsAvailable === mediumCarparkLowest);
-
-  const bigCarparkHighest = Math.max(
-    ...carparkGroupedByCategory["Big"].map((carpark) => carpark.lotsAvailable)
-  );
-  const bigCarparkLowest = Math.min(
-    ...carparkGroupedByCategory["Big"].map((carpark) => carpark.lotsAvailable)
-  );
-  const listOfBigCarparkWithHighestAvailability = carparkGroupedByCategory[
-    "Big"
-  ].filter((carpark) => carpark.lotsAvailable === bigCarparkHighest);
-  const listOfBigCarparkWithLowestAvailability = carparkGroupedByCategory[
-    "Big"
-  ].filter((carpark) => carpark.lotsAvailable === bigCarparkLowest);
-
-  const largeCarparkHighest = Math.max(
-    ...carparkGroupedByCategory["Large"].map((carpark) => carpark.lotsAvailable)
-  );
-  const largeCarparkLowest = Math.min(
-    ...carparkGroupedByCategory["Large"].map((carpark) => carpark.lotsAvailable)
-  );
-  const listOfLargeCarparkWithHighestAvailability = carparkGroupedByCategory[
-    "Large"
-  ].filter((carpark) => carpark.lotsAvailable === largeCarparkHighest);
-  const listOfLargeCarparkWithLowestAvailability = carparkGroupedByCategory[
-    "Large"
-  ].filter((carpark) => carpark.lotsAvailable === largeCarparkLowest);
-
-  return [
-    {
-      category: "Small",
-      highestNumberOfLots: smallCarparkHighest,
+    result.push({
+      category: category,
+      highestNumberOfLots: carparkHighest,
       listOfCarparksWithHighestAvailability:
-        listOfSmallCarparkWithHighestAvailability.map(
+        listOfCarparkWithHighestAvailability.map(
           (carpark) => carpark.carparkNumber
         ),
-      lowestNumberOfLots: smallCarparkLowest,
+      lowestNumberOfLots: carparkLowest,
       listOfCarparksWithLowestAvailability:
-        listOfSmallCarparkWithLowestAvailability.map(
+        listOfCarparkWithLowestAvailability.map(
           (carpark) => carpark.carparkNumber
         ),
-    },
-    {
-      category: "Medium",
-      highestNumberOfLots: mediumCarparkHighest,
-      listOfCarparksWithHighestAvailability:
-        listOfMediumCarparkWithHighestAvailability.map(
-          (carpark) => carpark.carparkNumber
-        ),
-      lowestNumberOfLots: mediumCarparkLowest,
-      listOfCarparksWithLowestAvailability:
-        listOfMediumCarparkWithLowestAvailability.map(
-          (carpark) => carpark.carparkNumber
-        ),
-    },
-    {
-      category: "Big",
-      highestNumberOfLots: bigCarparkHighest,
-      listOfCarparksWithHighestAvailability:
-        listOfBigCarparkWithHighestAvailability.map(
-          (carpark) => carpark.carparkNumber
-        ),
-      lowestNumberOfLots: bigCarparkLowest,
-      listOfCarparksWithLowestAvailability:
-        listOfBigCarparkWithLowestAvailability.map(
-          (carpark) => carpark.carparkNumber
-        ),
-    },
-    {
-      category: "Large",
-      highestNumberOfLots: largeCarparkHighest,
-      listOfCarparksWithHighestAvailability:
-        listOfLargeCarparkWithHighestAvailability.map(
-          (carpark) => carpark.carparkNumber
-        ),
-      lowestNumberOfLots: largeCarparkLowest,
-      listOfCarparksWithLowestAvailability:
-        listOfLargeCarparkWithLowestAvailability.map(
-          (carpark) => carpark.carparkNumber
-        ),
-    },
-  ];
+    });
+  });
 
-  //   const smallCarparkHighest = carparkGroupedByCategory["Small"].reduce((maxCarpark, carpark) => {
-  //     return maxCarpark.lotsAvailable > carpark.lotsAvailable ? maxCarpark : carpark;
-  //   })
-
-  //   const smallCarparkLowest = carparkGroupedByCategory["Small"].reduce((minCarpark, carpark) => {
-  //     return minCarpark.lotsAvailable < carpark.lotsAvailable ? minCarpark : carpark;
-  //   })
-
-  //   const mediumCarparkHighest = carparkGroupedByCategory["Medium"].reduce((maxCarpark, carpark) => {
-  //     return maxCarpark.lotsAvailable > carpark.lotsAvailable ? maxCarpark : carpark;
-  //   })
-
-  //   const mediumCarparkLowest = carparkGroupedByCategory["Medium"].reduce((minCarpark, carpark) => {
-  //     return minCarpark.lotsAvailable < carpark.lotsAvailable ? minCarpark : carpark;
-  //   })
-
-  //   const bigCarparkHighest = carparkGroupedByCategory["Big"].reduce((maxCarpark, carpark) => {
-  //     return maxCarpark.lotsAvailable > carpark.lotsAvailable ? maxCarpark : carpark;
-  //   })
-
-  //   const bigCarparkLowest = carparkGroupedByCategory["Big"].reduce((minCarpark, carpark) => {
-  //     return minCarpark.lotsAvailable < carpark.lotsAvailable ? minCarpark : carpark;
-  //   })
-
-  //   const largeCarparkHighest = carparkGroupedByCategory["Large"].reduce((maxCarpark, carpark) => {
-  //     return maxCarpark.lotsAvailable > carpark.lotsAvailable ? maxCarpark : carpark;
-  //   })
-
-  //   const largeCarparkLowest = carparkGroupedByCategory["Large"].reduce((minCarpark, carpark) => {
-  //     return minCarpark.lotsAvailable < carpark.lotsAvailable ? minCarpark : carpark;
-  //   })
+  return result;
 };
 
 export default useCarparkAPI;
